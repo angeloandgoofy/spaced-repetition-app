@@ -12,17 +12,31 @@ export const GET_DECKS  = gql`
 `;
 
 export const GET_DECK = gql`
-    query Deck($id: ID!){
-        deck(id:$id) {
-            id
-            title
-            cards {
+  query GetDeck($id: ID!) {
+    deck(id: $id) {
+      id
+      title
+      cardCount
+      cards {
+        id
+        front
+        back
+        isDue
+      }
+    }
+  }
+`;
+
+export const GET_NEXT_CARD_IN_DECK  = gql`
+    query NextCard($deckId: ID!) {
+        nextCardToReview(deckId: $deckId){
+            cards{
                 id
                 front
                 back
-                isDue
             }
+            totalDue
+            remaining
         }
     }
 `;
-

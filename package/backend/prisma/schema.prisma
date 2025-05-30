@@ -10,9 +10,9 @@ generator client {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String?  // Made optional since demo users don't have passwords
+  password  String?  
   name      String?
-  createdAt DateTime @default(now()) // Added missing field
+  createdAt DateTime @default(now()) 
   decks     Deck[]
   cards     Card[]
   reviews   Review[]
@@ -21,8 +21,8 @@ model User {
 model Deck {
   id          String   @id @default(cuid())
   title       String
-  createdAt   DateTime @default(now()) // Added missing field
-  updatedAt   DateTime @updatedAt // Added missing field
+  createdAt   DateTime @default(now()) 
+  updatedAt   DateTime @updatedAt 
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   cards       Card[]

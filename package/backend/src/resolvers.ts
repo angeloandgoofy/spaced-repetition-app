@@ -56,8 +56,8 @@ const typeDefs = `
   }
 
   type Mutation {
-    signup(email: String!, Password: String!): String!
-    login(email: String!, Password: String!): String!
+    signup(email: String!, password: String!, name: String!): String!
+    login(email: String!, password: String!): String!
     createDeck(title: String!): Deck!
     updateDeck(id: ID!, title: String): Deck!
     deleteDeck(id: ID!): Boolean!
@@ -133,8 +133,10 @@ const resolvers = {
   },
 
   Mutation: {
-    signup: async(_: any, {email, Password, name}: any, {prisma}: Context) =>{
-      const hash = await bcrypt.hash(Password, 10);
+    signup: async(_: any, {email, password, name}: any, {prisma}: Context) =>{
+      const checkEmail = await prisma.user.findUnique({where: {email}});
+      if(checkEmail) {throw new Error("Email already exists.")}
+      const hash = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
         data: {email, password: hash, name},
       });
@@ -209,6 +211,8 @@ const resolvers = {
       if(!userId) throw new Error('Not authenticated');
       if(!front || !back) throw new Error('Cannot be empty');
       const card = await prisma.card.findUnique({where: {id}});
+      if (!card || card.userId !== userId) throw new Error('Card not found');
+
       return prisma.card.update({
         where: {id},
         data: {front, back},
