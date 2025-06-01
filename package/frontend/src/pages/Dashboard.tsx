@@ -9,8 +9,16 @@ function Dashboard() {
   const [createDeck] = useMutation(CREATE_DECK);
   const [createCard] = useMutation(CREATE_CARD);
 
+  const [visible, setVisible] = useState(false);
+  const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
+
   const [cDeck, setDeck] = useState({ title: "" });
-  const [cCard, setCard] = useState({ deckId: "", front: "", back: "" });
+  const [cCard, setCard] = useState({ front: "", back: "" });
+
+  const closeVisible = () => {
+    setVisible(false);
+    setCard({ front: "", back: "" }); // reset card form on close
+  };
 
   const handleCreateD = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDeck({ ...cDeck, [e.target.name]: e.target.value });
@@ -41,12 +49,18 @@ function Dashboard() {
   };
 
   const handleCreateCard = async () => {
-    const { deckId, front, back } = cCard;
-    if (!deckId || !front.trim() || !back.trim()) return;
+    if (!selectedDeckId || !cCard.front.trim() || !cCard.back.trim()) return;
     try {
-      await createCard({ variables: { deckId, front, back } });
-      setCard({ deckId: "", front: "", back: "" });
+      await createCard({
+        variables: {
+          deckId: selectedDeckId,
+          front: cCard.front,
+          back: cCard.back,
+        },
+      });
+      setCard({ front: "", back: "" });
       await refetch();
+      closeVisible(); // close modal after success
     } catch (err) {
       console.error("ERROR creating card: ", err);
     }
@@ -72,45 +86,53 @@ function Dashboard() {
         <button onClick={handleCreateDeck}>Create Deck</button>
       </div>
 
-      {/* Create Card Section */}
-      <div>
-        <h2>Create a Card</h2>
-        <input
-          type="text"
-          name="deckId"
-          value={cCard.deckId}
-          placeholder="Deck ID"
-          onChange={handleCreateC}
-        />
-        <input
-          type="text"
-          name="front"
-          value={cCard.front}
-          placeholder="Front"
-          onChange={handleCreateC}
-        />
-        <input
-          type="text"
-          name="back"
-          value={cCard.back}
-          placeholder="Back"
-          onChange={handleCreateC}
-        />
-        <button onClick={handleCreateCard}>Create Card</button>
-      </div>
-
       {/* Display Decks */}
       <div className="Deck-Display">
         <h2>Your Decks</h2>
         <ul>
           {data?.decks.map((deck: any) => (
             <li key={deck.id}>
-              <strong> {deck.id} </strong><strong>{deck.title}</strong> — {deck.cardCount} cards
+              <strong>{deck.title}</strong> — {deck.cardCount} cards
               <button onClick={() => handleDelete(deck.id)}>Delete</button>
+              <button
+                onClick={() => {
+                  setVisible(true);
+                  setSelectedDeckId(deck.id);
+                }}
+              >
+                ADD CARD
+              </button>
             </li>
           ))}
         </ul>
       </div>
+
+      {/* Card Creation Modal */}
+      {visible && (
+        <div className="overlay" onClick={closeVisible}>
+          <div className="card-container" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={closeVisible}>
+              &times;
+            </button>
+            <h3>Create Card</h3>
+            <input
+              type="text"
+              name="front"
+              value={cCard.front}
+              placeholder="Front"
+              onChange={handleCreateC}
+            />
+            <input
+              type="text"
+              name="back"
+              value={cCard.back}
+              placeholder="Back"
+              onChange={handleCreateC}
+            />
+            <button onClick={handleCreateCard}>Create Card</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
