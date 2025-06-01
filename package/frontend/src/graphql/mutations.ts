@@ -17,7 +17,6 @@ export const CREATE_DECK = gql`
     createDeck(title: $title) {
       id
       title
-      userId
       cards {
         id
         front
@@ -60,8 +59,6 @@ export const CREATE_CARD = gql`
       id
       front
       back
-      deckId
-      userId
     }
   }
 `;
