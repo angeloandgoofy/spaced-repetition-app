@@ -1,4 +1,4 @@
-import { useMutation } from "@apollo/client";
+import { useApolloClient, useMutation } from "@apollo/client";
 import { LOGIN } from '../graphql/mutations';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,11 +13,15 @@ interface LoginData {
 }
 
 function Login() {
+
+  const client = useApolloClient();
+
   const [loginMutation, { loading }] = useMutation<LoginData>(LOGIN);
   const [formData, setFormData] = useState<LoginForm>({ 
     email: "", 
     password: "" 
   });
+
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
@@ -27,7 +31,6 @@ function Login() {
   };
 
   const handleLogin = async () => {
-    // Input validation
     if (!formData.email.trim() || !formData.password.trim()) {
       setError("Please fill in all fields");
       return;
@@ -43,6 +46,7 @@ function Login() {
 
       if (data?.login) {
         localStorage.setItem("token", data.login);
+        await client.resetStore();
         navigate('/dashboard');
       }
     } catch (err: any) {

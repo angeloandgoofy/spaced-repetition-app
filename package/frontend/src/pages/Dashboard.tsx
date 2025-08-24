@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useApolloClient } from "@apollo/client";
 import { GET_DECKS } from "../graphql/queries";
 import { DELETE_DECK, CREATE_DECK, CREATE_CARD } from "../graphql/mutations";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Flashcard from '../components/DeckCard'
 import '../styles/dashboard.css'
@@ -29,7 +29,9 @@ function Dashboard() {
   const client = useApolloClient();
   const navigate = useNavigate();
 
-  const { data, error, loading, refetch } = useQuery<DecksData>(GET_DECKS);
+  const { data, error, loading, refetch } = useQuery<DecksData>(GET_DECKS, {
+    fetchPolicy: "network-only",
+  });
   const [deleteMutation, { loading: deleteLoading }] = useMutation(DELETE_DECK);
   const [createDeck, { loading: createDeckLoading }] = useMutation(CREATE_DECK);
   const [createCard, { loading: createCardLoading }] = useMutation(CREATE_CARD);

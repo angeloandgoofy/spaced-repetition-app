@@ -1,9 +1,12 @@
 .Dashboard-container{
     display: 'flex';
     justify-content: 'space-between'; 
+    justify-content: center;
+    height: 100vh;
     align-items: 'center';
     margin-bottom: '1.5rem';
 }
+
 .overlay{
     position: 'fixed';
     top: 0;
@@ -14,10 +17,11 @@
     display: 'flex';
     justify-content: 'center';
     align-items: 'center';
+    z-index: 999;
 }
 
 .container {
-  background: #5c3b0f;
+  background: #312f2d;
   padding: 2rem;
   border-radius: 8px;
   min-width: 300px;
@@ -26,8 +30,6 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
   position: relative;
 }
-
-
 
 .close-btn{
     position: 'absolute';
