@@ -28,7 +28,6 @@ interface CreateCardForm {
 function Dashboard() {
   const client = useApolloClient();
   const navigate = useNavigate();
-  const { deckId } = useParams<{deckId: string}>();
 
   const { data, error, loading, refetch } = useQuery<DecksData>(GET_DECKS);
   const [deleteMutation, { loading: deleteLoading }] = useMutation(DELETE_DECK);
@@ -279,7 +278,7 @@ function Dashboard() {
               }}>
                 <div>
                   <strong>{deck.title}</strong>
-                  <span style={{ color: 'white', marginLeft: '0.5rem' }}>
+                  <span style={{ color: 'white', marginLeft: '0.5rem'}}>
                     — {deck.cardCount} card{deck.cardCount !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -306,7 +305,7 @@ function Dashboard() {
                       setSelectedDeckId(deck.id);
                     }}
                     style={{
-                      background: '#10b981',
+                      background: '#13ac79ff',
                       color: 'white',
                       border: 'none',
                       borderRadius: '0.25rem',
@@ -349,7 +348,7 @@ function Dashboard() {
             >
               &times;
             </button>
-            <h3>FlashCards Review</h3>
+            <strong>FlashCards Review</strong>
             <Flashcard deckId={selectedDeckId} />
           </div>
         </div>

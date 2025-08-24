@@ -24,10 +24,8 @@ function Signup() {
   const [success, setSuccess] = useState<string>("");
   const navigate = useNavigate();
 
-  // Fixed: Added proper TypeScript typing for event
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear messages when user starts typing
     if (error) setError("");
     if (success) setSuccess("");
   };
