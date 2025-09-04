@@ -41,9 +41,9 @@ export const UPDATE_DECK = gql`
 `;
 
 export const DELETE_DECK = gql`
-    mutation DeleteDeck($id: ID!){
-        deleteDeck(id : $id)
-    }
+  mutation DeleteDeck($id: ID!){
+      deleteDeck(id : $id)
+  }
 `;
 
 
@@ -73,13 +73,13 @@ export const UPDATE_CARD = gql`
 `;
 export const REVIEW_CARD = gql`
   mutation ReviewCard($cardId: ID!, $quality: Int!) {
-  reviewCard(cardId: $cardId, quality: $quality) {
-    id
-    dueDate
-    easiness
-    interval
-    repetitions
-    isDue
+    reviewCard(cardId: $cardId, quality: $quality) {
+      id
+      dueDate
+      easiness
+      interval
+      repetitions
+      isDue
+    }
   }
-}
 `;

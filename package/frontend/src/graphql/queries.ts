@@ -22,6 +22,7 @@ export const GET_DECK = gql`
         front
         back
         isDue
+        dueDate
       }
     }
   }

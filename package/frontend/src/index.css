@@ -11,12 +11,10 @@
   text-rendering: optimizeLegibility;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+html, body {
+  margin: 1;
+  padding: 0;
+  height: 100%;
 }
 
 h1 {
@@ -35,8 +33,10 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
-  border-color: #060827;
+  border-color: #0713bd;
+  background-color: #1a1a1a;
 }
 button:focus,
 button:focus-visible {

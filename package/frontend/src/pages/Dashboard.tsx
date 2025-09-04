@@ -63,12 +63,13 @@ function Dashboard() {
     setDeckForm({ ...deckForm, [e.target.name]: e.target.value });
     if (formErrors) setFormErrors("");
   };
+  type InputOrTextAreaEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
 
-  const handleCreateCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCardForm({ ...cardForm, [e.target.name]: e.target.value });
+  const handleCreateCardChange = (e: InputOrTextAreaEvent) => {
+    const { name, value } = e.currentTarget;
+    setCardForm(prev => ({ ...prev, [name]: value }));
     if (formErrors) setFormErrors("");
   };
-
   const handleLogout = async () => {
     setIsLoggingOut(true);
     
@@ -342,7 +343,7 @@ function Dashboard() {
 
       {/*flashcards */}
       {isOpen && (
-        <div className="overlay" onClick={closeIsOpen}>
+        <div className="overlay">
           <div className="container" onClick={(e) => e.stopPropagation()}>
           <button 
               className="close-btn" 
@@ -358,7 +359,7 @@ function Dashboard() {
 
       {/* Card Creation Modal */}
       {visible && (
-        <div className="overlay" onClick={closeVisible} >
+        <div className="overlay">
           <div className="container" onClick={(e) => e.stopPropagation()}>
             <button 
               className="close-btn" 
@@ -389,27 +390,23 @@ function Dashboard() {
             
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem' }}>Back:</label>
-              <input
-                type="text"
+              <textarea
                 name="back"
                 value={cardForm.back}
                 placeholder="Answer or explanation..."
                 onChange={handleCreateCardChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !createCardLoading && cardForm.front.trim() && cardForm.back.trim()) {
-                    handleCreateCard();
-                  }
-                }}
                 disabled={createCardLoading}
                 style={{
                   width: '100%',
+                  height: '100px',
                   padding: '0.5rem',
                   border: '1px solid #ccc',
-                  borderRadius: '0.25rem'
+                  borderRadius: '0.25rem',
+                  resize: 'vertical',
                 }}
               />
             </div>
-            
+                        
             <button 
               onClick={handleCreateCard}
               disabled={createCardLoading || !cardForm.front.trim() || !cardForm.back.trim()}

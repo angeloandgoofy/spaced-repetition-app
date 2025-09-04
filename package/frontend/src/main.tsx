@@ -4,7 +4,6 @@ import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/c
 import { setContext } from "@apollo/client/link/context";
 import './index.css';
 import App from './App.tsx';
-import { application } from 'express';
 
 
 const httpLink = new HttpLink({
