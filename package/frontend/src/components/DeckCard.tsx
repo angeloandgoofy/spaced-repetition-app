@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_DECK } from '../graphql/queries';
 import { DELETE_CARD, REVIEW_CARD } from "../graphql/mutations";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface Card {
   id: string;
@@ -35,9 +35,9 @@ function DeckCard({ deckId }: { deckId: string | null}) {
   });
   
   const [reviewMutation] = useMutation(REVIEW_CARD, {
-    // Optimistically update the cache  
-    refetchQueries: [{ query: GET_DECK, variables: { id: deckId } }]
+    refetchQueries: [{ query: GET_DECK, variables: { id: deckId } }],
   });
+
 
   const cards = data?.deck?.cards ?? [];
 
@@ -50,15 +50,6 @@ function DeckCard({ deckId }: { deckId: string | null}) {
 
   const [indexC, setIndex] = useState(0);
   const[back, setBack] = useState(false);
-
-  const handleDifficulty = async (cardId: string, quality: number) =>{
-    setBack(false);
-    try{
-      await reviewMutation({variables: {cardId, quality}});
-      setIndex(prev => (prev + 1) % cards.length);
-    }catch(err: any) {console.error(err);}
-
-  }
 
   function isDue(dueDate: Date) {
     const now = Date.now();
@@ -75,9 +66,6 @@ function DeckCard({ deckId }: { deckId: string | null}) {
     .filter((card) => isDue(card.dueDate))
     .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
 
-    useEffect(() => {
-      console.log("LENGHT: ", reviewCards.length)
-    }, [reviewCards.length])
   const deleteCard = async (cardId: string)=> {
     if (!confirm("Are you sure you want to delete this card? This action cannot be undone.")) {
       return;
@@ -90,6 +78,16 @@ function DeckCard({ deckId }: { deckId: string | null}) {
     }
   }
  
+   const handleDifficulty = async (cardId: string, quality: number) =>{
+      setBack(false);
+      try{
+        await reviewMutation({variables: {cardId, quality}});
+        const newCards = reviewCards.filter(c => c.id !== cardId);
+        setIndex((prev) =>{
+          return (prev + 1) % newCards.length});
+      }catch(err: any) {console.error(err);}
+    }
+
   if(reviewCards.length === 0){
     return (
       <div>
