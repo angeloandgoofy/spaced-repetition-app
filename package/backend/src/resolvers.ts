@@ -308,30 +308,37 @@ const resolvers = {
           interval: card.interval,
           repetitions: card.repetitions,
         });
-        
+
+        const ms = preview.dueDate.getTime();
+        const now = Date.now();
+        const dueTime = ms - now;
+
         return {
           quality,
           nextDueDate: preview.dueDate.toISOString(),
           intervalDays: preview.interval,
-          intervalText: formatInterval(preview.interval) 
+          intervalText: formatIntervalMs(dueTime) 
         };
       });
     }
   },
 };
 
-function formatInterval(days: number): string {
+function formatIntervalMs(ms: number): string {
+  const minutes = ms / 60000;
+  const hours = minutes / 60;
+  const days = hours / 24;
+
   if (days < 1) {
-    const hours = days * 24;
     if (hours < 1) {
-      const minutes = Math.round(hours * 60);
-      if (minutes < 1) return "Less than 1 min";
-      return `${minutes} min${minutes > 1 ? 's' : ''}`;
+      if (minutes < 1) return "< 1 min";
+      const roundedMinutes = Math.round(minutes);
+      return `${roundedMinutes} min${roundedMinutes > 1 ? 's' : ''}`;
     }
     const roundedHours = Math.round(hours);
     return `${roundedHours} hour${roundedHours > 1 ? 's' : ''}`;
   }
-  
+
   if (days === 1) return "1 day";
   if (days < 7) return `${Math.round(days)} days`;
   if (days < 30) {
@@ -342,9 +349,9 @@ function formatInterval(days: number): string {
     const months = Math.round(days / 30);
     return `${months} month${months > 1 ? 's' : ''}`;
   }
-  
+
   const years = Math.round(days / 365);
   return `${years} year${years > 1 ? 's' : ''}`;
-}
 
+}
 export { typeDefs, resolvers };

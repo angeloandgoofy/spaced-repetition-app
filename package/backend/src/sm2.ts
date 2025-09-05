@@ -93,6 +93,13 @@ export function calculateSM2(input: SM2Input): SM2Result {
 }
 
 
-export function isDue(dueDate: Date): boolean {
-  return Date.now() >= dueDate.getTime();
+export function isDue(dueDate: Date, threshold = 1): boolean {
+  const thresholdMS = threshold * 60 * 1000;
+
+    const now = Date.now();
+    const dueTime = dueDate.getTime();
+
+    const diffMs = dueTime - now;
+
+    return diffMs <= thresholdMS; 
 }

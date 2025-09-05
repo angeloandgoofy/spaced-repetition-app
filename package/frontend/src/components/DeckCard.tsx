@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_DECK } from '../graphql/queries';
 import { DELETE_CARD, REVIEW_CARD } from "../graphql/mutations";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ReviewPreview {
   quality: number;
@@ -39,7 +39,7 @@ function DeckCard({ deckId }: { deckId: string | null}) {
     skip: !deckId
   });
   
-   const [deleteMutation] = useMutation(DELETE_CARD, {
+  const [deleteMutation] = useMutation(DELETE_CARD, {
     refetchQueries: [{ query: GET_DECK, variables: { id: deckId } }]
   });
   
@@ -47,32 +47,20 @@ function DeckCard({ deckId }: { deckId: string | null}) {
     refetchQueries: [{ query: GET_DECK, variables: { id: deckId } }],
   });
 
-  const cards = data?.deck?.cards ?? [];
+  let cards = data?.deck?.cards ?? [];
 
   const [indexC, setIndex] = useState(0);
   const[back, setBack] = useState(false);
-
-  function isDue(dueDate: Date, threshold = 1){
-    const thresholdMS = threshold * 60 * 1000;
-
-    const now = Date.now();
-    const dueTime = dueDate.getTime();
-
-    const diffMs = dueTime - now;
-
-    return diffMs <= thresholdMS; 
-  }
 
   let reviewCards = [...cards]
     .map(card => {
       const date = new Date(Number(card.dueDate)); 
       const now = new Date(Number(Date.now()));
-
-      
       return { ...card, dueDate: date };
     })
-    .filter((card) => isDue(card.dueDate))
+    .filter((card) => card.isDue)
     .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+
 
   const deleteCard = async (cardId: string)=> {
     if (!confirm("Are you sure you want to delete this card? This action cannot be undone.")) {
@@ -91,17 +79,16 @@ function DeckCard({ deckId }: { deckId: string | null}) {
     }
   }
 
-  /**fix bug index */
-   const handleDifficulty = async (cardId: string, quality: number) =>{
-      setBack(false);
-      try{
-        await reviewMutation({variables: {cardId, quality}});
-        const remainingCards = reviewCards.filter(c => c.id !== cardId);
-        
-        setIndex((prev) =>{
-          return (prev + 1) % remainingCards.length});
-      }catch(err: any) {console.error(err);}
-    }
+  const handleDifficulty = async (cardId: string, quality: number) =>{
+    setBack(false);
+    try{
+      await reviewMutation({variables: {cardId, quality}});
+      const remainingCards = reviewCards.filter(c => c.id !== cardId);
+      setIndex((prev) => (prev >= remainingCards.length ? 0 : prev));
+      await refetch();
+    }catch(err: any) {console.error(err);}
+  }
+
 
   if(reviewCards.length === 0){
     return (
@@ -122,8 +109,7 @@ function DeckCard({ deckId }: { deckId: string | null}) {
   if (error) return <p>Error loading Deck: {error.message}</p>;
 
   const currentReview = reviewCards[indexC];
-
-  console.log("THIS IS CURRENTREVIEW: ", currentReview, indexC);
+  console.log(currentReview)
 
   return (
     <div className="deck-card-container">
@@ -134,7 +120,7 @@ function DeckCard({ deckId }: { deckId: string | null}) {
                 <h2>{currentReview?.front}</h2>
                 <div style={{display: "flex", justifyContent: "center", gap: "5rem"}}>
                   <button onClick={() => setBack(true)} disabled={isDeleting}> BACK</button>
-                  <button onClick={() => {deleteCard(reviewCards[indexC].id)}} disabled={isDeleting}> {isDeleting ? 'Deleting' : 'Delete'} </button>
+                  <button onClick={() => {deleteCard(currentReview.id)}} disabled={isDeleting}> {isDeleting ? 'Deleting' : 'Delete'} </button>
                 </div>
             </div> :(
                 <div>

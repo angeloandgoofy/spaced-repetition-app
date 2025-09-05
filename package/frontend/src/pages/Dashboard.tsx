@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useApolloClient } from "@apollo/client";
-import { GET_DECKS } from "../graphql/queries";
+import { GET_DECKS, GET_DECK } from "../graphql/queries";
 import { DELETE_DECK, CREATE_DECK, CREATE_CARD } from "../graphql/mutations";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -29,13 +29,6 @@ function Dashboard() {
   const client = useApolloClient();
   const navigate = useNavigate();
 
-  const { data, error, loading, refetch } = useQuery<DecksData>(GET_DECKS, {
-    fetchPolicy: "network-only",
-  });
-  const [deleteMutation, { loading: deleteLoading }] = useMutation(DELETE_DECK);
-  const [createDeck, { loading: createDeckLoading }] = useMutation(CREATE_DECK);
-  const [createCard, { loading: createCardLoading }] = useMutation(CREATE_CARD);
-  
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [visible, setVisible] = useState(false);
   const [isOpen, setIsopen] = useState(false);
@@ -45,6 +38,20 @@ function Dashboard() {
 
   const [deckForm, setDeckForm] = useState<CreateDeckForm>({ title: "" });
   const [cardForm, setCardForm] = useState<CreateCardForm>({ front: "", back: "" });
+
+  const { data, error, loading, refetch } = useQuery<DecksData>(GET_DECKS, {
+    fetchPolicy: "network-only",
+  });
+
+  const [deleteMutation, { loading: deleteLoading }] = useMutation(DELETE_DECK);
+  const [createDeck, { loading: createDeckLoading }] = useMutation(CREATE_DECK);
+
+  const [createCard, { loading: createCardLoading }] = useMutation(CREATE_CARD ,{
+    refetchQueries: [
+      { query: GET_DECK, variables: { id: selectedDeckId } } 
+    ],
+    awaitRefetchQueries: true 
+  });
 
   const closeIsOpen = () => {
     setIsopen(false);
@@ -121,18 +128,9 @@ function Dashboard() {
   };
 
   const handleCreateCard = async () => {
-    if (!selectedDeckId) {
-      setFormErrors("Please select a deck");
-      return;
-    }
-    if (!cardForm.front.trim()) {
-      setFormErrors("Card front is required");
-      return;
-    }
-    if (!cardForm.back.trim()) {
-      setFormErrors("Card back is required");
-      return;
-    }
+    if (!selectedDeckId) return setFormErrors("Please select a deck");
+    if (!cardForm.front.trim()) return setFormErrors("Card front is required");
+    if (!cardForm.back.trim()) return setFormErrors("Card back is required");
 
     try {
       await createCard({
@@ -143,9 +141,8 @@ function Dashboard() {
         },
       });
       setCardForm({ front: "", back: "" });
-      await refetch();
       closeVisible();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error creating card:", err);
       setFormErrors("Failed to create card. Please try again.");
     }
