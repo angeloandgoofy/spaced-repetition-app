@@ -23,10 +23,18 @@ export const GET_DECK = gql`
         back
         isDue
         dueDate
+        repetitions
+        reviewPreviews {
+          quality
+          nextDueDate
+          intervalDays
+          intervalText
+        }
       }
     }
   }
 `;
+
 
 export const GET_NEXT_CARD_IN_DECK  = gql`
     query NextCard($deckId: ID!) {
@@ -41,3 +49,4 @@ export const GET_NEXT_CARD_IN_DECK  = gql`
         }
     }
 `;
+

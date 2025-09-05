@@ -20,19 +20,27 @@ const typeDefs = `
     dueCardCount: Int!
   }
 
-  type Card {
-    id: ID!
-    front: String!
-    back: String!
-    easiness: Float!
-    interval: Int!
-    repetitions: Int!
-    dueDate: String!
-    isDue: Boolean!
-    createdAt: String!
-    updatedAt: String!
-    deck: Deck!
-  }
+type Card {
+  id: ID!
+  front: String!
+  back: String!
+  easiness: Float!
+  interval: Int!
+  repetitions: Int!
+  dueDate: String!
+  isDue: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  deck: Deck!
+  reviewPreviews: [ReviewPreview!]!  
+}
+
+type ReviewPreview {
+  quality: Int!
+  nextDueDate: String!
+  intervalDays: Int!
+  intervalText: String!
+}
 
   type Review {
     id: ID!
@@ -289,7 +297,54 @@ const resolvers = {
 
   Card: {
     isDue: (card: any) => isDue(new Date(card.dueDate)),
+    
+    reviewPreviews: async (card: any) => {
+      const qualities = [1, 3, 4, 5]; 
+      
+      return qualities.map(quality => {
+        const preview = calculateSM2({
+          quality,
+          easiness: card.easiness,
+          interval: card.interval,
+          repetitions: card.repetitions,
+        });
+        
+        return {
+          quality,
+          nextDueDate: preview.dueDate.toISOString(),
+          intervalDays: preview.interval,
+          intervalText: formatInterval(preview.interval) 
+        };
+      });
+    }
   },
 };
+
+function formatInterval(days: number): string {
+  if (days < 1) {
+    const hours = days * 24;
+    if (hours < 1) {
+      const minutes = Math.round(hours * 60);
+      if (minutes < 1) return "Less than 1 min";
+      return `${minutes} min${minutes > 1 ? 's' : ''}`;
+    }
+    const roundedHours = Math.round(hours);
+    return `${roundedHours} hour${roundedHours > 1 ? 's' : ''}`;
+  }
+  
+  if (days === 1) return "1 day";
+  if (days < 7) return `${Math.round(days)} days`;
+  if (days < 30) {
+    const weeks = Math.round(days / 7);
+    return `${weeks} week${weeks > 1 ? 's' : ''}`;
+  }
+  if (days < 365) {
+    const months = Math.round(days / 30);
+    return `${months} month${months > 1 ? 's' : ''}`;
+  }
+  
+  const years = Math.round(days / 365);
+  return `${years} year${years > 1 ? 's' : ''}`;
+}
 
 export { typeDefs, resolvers };
