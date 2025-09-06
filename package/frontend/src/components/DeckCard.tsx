@@ -99,7 +99,7 @@ function DeckCard({ deckId }: { deckId: string | null}) {
   }
 
   const difficultyMap = [
-    { label: "Again", quality: 1, color: "#ef4444",},
+    { label: "Again", quality: 1, color: "#ef4444"},
     { label: "Hard",  quality: 3, color: "#f97316"},   
     { label: "Good",  quality: 4, color: "#22c55e"}, 
     { label: "Easy",  quality: 5, color: "#3b82f6"},
@@ -109,7 +109,6 @@ function DeckCard({ deckId }: { deckId: string | null}) {
   if (error) return <p>Error loading Deck: {error.message}</p>;
 
   const currentReview = reviewCards[indexC];
-  console.log(currentReview)
 
   return (
     <div className="deck-card-container">
@@ -126,18 +125,38 @@ function DeckCard({ deckId }: { deckId: string | null}) {
                 <div>
                     <p>{currentReview?.back ?? "No back text available"}</p>
                     <div style={{ display: 'flex', flexDirection: 'row', gap: '.5rem', justifyContent: 'center' }}>
-                      {difficultyMap.map(({ label, quality, color }) => (
-                        <button
-                          key={label}
-                          style={{
-                            fontSize: '.8rem',
-                            color: color
-                          }}
-                          onClick={() => handleDifficulty(reviewCards[indexC].id, quality)}
-                        >
-                          {label}
-                        </button>
-                      ))}
+
+                      {difficultyMap.map(({ label, quality, color }) => {
+                        const preview = currentReview?.reviewPreviews?.find(p => p.quality === quality);
+                        
+                        return (
+                          <button
+                            key={label}
+                            style={{
+                              fontSize: '.8rem',
+                              color: color,
+                              padding: '8px 12px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              minWidth: '80px'
+                            }}
+                            onClick={() => handleDifficulty(currentReview.id, quality)}
+                            title={preview ? `Next review in: ${preview.intervalText}` : ''}
+                          >
+                            <span>{label}</span>
+                            {preview && (
+                              <small style={{ 
+                                fontSize: '0.7rem', 
+                                opacity: 0.8,
+                                marginTop: '2px' 
+                              }}>
+                                {preview.intervalText}
+                              </small>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                 </div>
                 )}
